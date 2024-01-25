@@ -7,8 +7,21 @@ var windowHalfY = window.innerHeight / 2;
 
 // Object3D ("Group") nodes and Mesh nodes
 var sceneRoot = new THREE.Group();
-var earthSpin = new THREE.Group();
+
+var localRoot = new THREE.Group();
+var localRootPosition = new THREE.Group();
+
+var sunSpin = new THREE.Group();
+var sunMesh; 
+
+var earthTilt = new THREE.Group();
 var earthMesh;
+var earthSpin = new THREE.Group();
+
+var moonSpin = new THREE.Group();
+var moonPosition = new THREE.Group();
+var moonMesh;
+
 
 var animation = true;
 
@@ -31,9 +44,27 @@ function createSceneGraph() {
 
     // Top-level node
     scene.add(sceneRoot);
+    sceneRoot.add(localRoot);
+
+    // sun branch
+    localRootPosition.position.set(1.0, 0.0, 0.0);
+    sunSpin.rotation.z = 3 * Math.PI / 180;
+    sceneRoot.add(sunSpin);
+    sunSpin.add(sunMesh);
+    sunMesh.add(localRootPosition);
+
     // earth branch
-    sceneRoot.add(earthSpin);
-    earthSpin.add(earthMesh);
+    earthTilt.rotation.z = 24.44 * Math.PI / 180;
+    localRoot.add(earthSpin);
+    earthSpin.add(earthTilt);
+    earthTilt.add(earthMesh);
+
+    // moon branch
+    moonPosition.position.set(1.0, 0.0, 0.0);
+    moonSpin.rotation.z = 15.15 * Math.PI / 180;
+    earthSpin.add(moonSpin);
+    moonSpin.add(moonPosition),
+    moonPosition.add(moonMesh);
 }
 
 function init() {
@@ -44,13 +75,27 @@ function init() {
     
     var texloader = new THREE.TextureLoader();
     
-    // Earth mesh
-	var geometryEarth = new THREE.BoxGeometry(1, 1, 1, 8, 8, 8);    
+    // Sun mesh
+    var geometrySun = new THREE.SphereGeometry(0.9);
+    var materialSun = new THREE.MeshBasicMaterial();
+    materialSun.combine = 0;
+    materialSun.needsUpdate = true;
+    materialSun.wireframe = false; 
 
+    // Earth mesh
+	var geometryEarth = new THREE.SphereGeometry(0.5);    
     var materialEarth = new THREE.MeshBasicMaterial();
     materialEarth.combine = 0;
     materialEarth.needsUpdate = true;
-    materialEarth.wireframe = false;    
+    materialEarth.wireframe = false; 
+
+    // Moon mesh
+    var geometryMoon = new THREE.SphereGeometry(0.3);
+    var materialMoon = new THREE.MeshBasicMaterial();
+    materialMoon.combine = 0;
+    materialMoon.needsUpdate = true;
+    materialMoon.wireframe = false; 
+       
     //
     // Task 2: uncommenting the following two lines requires you to run this example with a (local) webserver
     //
@@ -61,10 +106,16 @@ function init() {
     //
     // see https://threejs.org/docs/#manual/en/introduction/How-to-run-things-locally
     //
-    /*
+    
+    const sunTexture = texloader.load('tex/2k_sun.jpg');
+    materialSun = sunTexture;
+
 	const earthTexture = texloader.load('tex/2k_earth_daymap.jpg');
     materialEarth.map = earthTexture;
-    */
+
+    const moonTexture = texloader.load('tex/2k_moon.jpg');
+    materialMoon.map = moonTexture;
+    
 
     // Task 7: material using custom Vertex Shader and Fragment Shader
     /*
@@ -84,7 +135,10 @@ function init() {
 	shaderMaterial.uniforms.colorTexture.value = earthTexture;
 	*/
 
+    sunMesh = new THREE.Mesh(geometrySun, materialSun);
     earthMesh = new THREE.Mesh(geometryEarth, materialEarth);
+    moonMesh = new THREE.Mesh(geometryMoon, materialMoon);
+
 
     createSceneGraph();
 
@@ -119,7 +173,8 @@ function render() {
 
     // Perform animations
     if (animation) {
-    	earthSpin.rotation.y += 0.01;
+        earthSpin.rotation.y += Math.PI / 60;
+    	earthTilt.rotation.y += 0.01;
     }
 
     // Render the scene
