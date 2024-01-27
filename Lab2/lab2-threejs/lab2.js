@@ -68,7 +68,7 @@ function createSceneGraph() {
   SunMesh.add(light);
 
   // Neptune
-  neptuneTrans.position.x = 7.5;
+  neptuneTrans.position.x = 6.5;
   neptuneTilt.rotation.z = 0.0;
 
   viewRoot.add(neptuneOrbit);
@@ -102,12 +102,12 @@ function init() {
   container = document.getElementById("container");
 
   camera = new THREE.PerspectiveCamera(
-    100,
+    60,
     window.innerWidth / window.innerHeight,
     0.1,
     100
   );
-  camera.position.z = 1;
+  camera.position.z = 2;
 
   var texloader = new THREE.TextureLoader();
 
